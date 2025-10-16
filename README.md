@@ -1,31 +1,32 @@
 # Neybor Houses Map – Interactive Visualization with Flask and Leaflet
 
+![Map Preview](maps.jpg)
+
 ## 1. Introduction
-The **Neybor Houses Map** is an interactive web application developed to visualize all Neybor houses across Brussels.  
-It allows users to explore, locate, and analyze Neybor’s housing network geographically through an intuitive interface.
+The **Neybor Houses Map** is an interactive web application built to visualize all Neybor houses across Brussels.  
+It enables users to explore, locate, and analyze Neybor’s housing network geographically through an intuitive interface.
 
-The project is built with **Python (Flask)** for the backend and **Leaflet.js** for the interactive map on the frontend.  
-It integrates a **distance calculator** that computes the straight-line distance between any two houses based on their GPS coordinates.
+The project uses **Python (Flask)** for the backend and **Leaflet.js** for the frontend map.  
+It also integrates a **distance calculator** that computes straight-line distances between houses using GPS coordinates.
 
-This tool was created to support **community management, event planning, and logistics optimization** within Neybor’s housing network.
+This tool was designed to support **community management, event planning, and logistics optimization** within Neybor’s housing network.
 
 ---
 
-## 2. Project Objectives
-The project aims to:
-1. Provide a clear geographic visualization of Neybor houses.
-2. Facilitate search and filtering by house name or address.
-3. Enable distance measurement between houses to support logistical decisions.
-4. Offer a simple, lightweight, and maintainable internal tool.
+## 2. Objectives
+- Provide a clear geographic visualization of Neybor houses.  
+- Facilitate search and filtering by house name or address.  
+- Enable distance measurement between houses.  
+- Offer a lightweight and easily deployable tool.
 
 ---
 
 ## 3. Key Features
-- **Interactive Map:** All houses are plotted using GPS coordinates.
-- **Search Function:** Users can search for houses by name or address.
-- **Distance Calculator:** Computes the great-circle distance (in kilometers) between any two houses.
-- **Dynamic Data Endpoint:** `/data.json` provides house coordinates in JSON format for potential integration.
-- **Lightweight Deployment:** Runs locally or can be shared temporarily through ngrok.
+- **Interactive Map:** Houses plotted using GPS coordinates.  
+- **Search Function:** Locate houses by name or address.  
+- **Distance Calculator:** Computes great-circle distances (in km).  
+- **Dynamic API Endpoint:** `/data.json` returns house data in JSON format.  
+- **Deployable Anywhere:** Includes Docker and Procfile support for easy hosting.  
 
 ---
 
@@ -34,11 +35,13 @@ The project aims to:
 |------------|-------------|
 | Backend | Python (Flask) |
 | Frontend | HTML, CSS, JavaScript |
-| Mapping Library | Leaflet.js |
-| Data | Static file (`data.py`) containing GPS coordinates |
-| Optional Hosting | ngrok for temporary sharing |
+| Mapping | Leaflet.js |
+| Deployment | Docker / Gunicorn / Procfile |
+| Data | Static Python file (`data.py`) |
+| Testing | fetch_test.py (API test script) |
 
 ---
+
 
 ## 5. Project Structure
 
@@ -47,6 +50,9 @@ NeyborMap/
 │
 ├── app.py # Flask server (serves pages + /data.json)
 ├── data.py # House dataset (name, address, lat, lon)
+├── fetch_test.py # Script to test API and data endpoint
+├── Dockerfile # Container configuration for deployment
+├── Procfile # Process definition for Heroku-like deployment
 │
 ├── templates/
 │ └── index.html # UI (map + search + distance picker)
@@ -55,6 +61,8 @@ NeyborMap/
 └── leaflet/ # (Optional) Local Leaflet assets if CDN is blocked
 ├── leaflet.css
 └── leaflet.js
+│
+└── maps.jpg # Screenshot preview of the map interface
 ```
 ---
 
@@ -151,6 +159,27 @@ Route	Description
 /data.json	Returns house data (name, address, lat, lon) in JSON format
 /ping	Simple health check
 /hello	Test endpoint for debugging
+
+---
+## Docker & Deployment
+
+Run in Docker
+```
+docker build -t neybor-map .
+docker run -p 5000:5000 neybor-map
+```
+Deploy to Heroku or Render
+
+The included Procfile defines the Flask app entrypoint:
+```
+web: gunicorn app:app
+```
+11. Testing the API
+
+Use the included fetch_test.py to verify that your /data.json endpoint is accessible:
+```
+python fetch_test.py
+```
 ---
 ## 10. Privacy and Data Protection
 
