@@ -45,20 +45,20 @@ The project aims to:
 ---
 
 ## Project Structure
-
+```
 NeyborMap/
 │
-├── app.py                  # Flask server (serves pages + /data.json)
-├── data.py                 # House dataset (name, address, lat, lon)
+├── app.py # Flask server (serves pages + /data.json)
+├── data.py # House dataset (name, address, lat, lon)
 │
 ├── templates/
-│   └── index.html          # UI (map + search + distance picker)
+│ └── index.html # UI (map + search + distance picker)
 │
 └── static/
-    └── leaflet/            # (Optional) Local Leaflet assets if CDN is blocked
-        ├── leaflet.css
-        └── leaflet.js
-
+└── leaflet/ # (Optional) Local Leaflet assets if CDN is blocked
+├── leaflet.css
+└── leaflet.js
+```
 ---
 
 ## Installation
