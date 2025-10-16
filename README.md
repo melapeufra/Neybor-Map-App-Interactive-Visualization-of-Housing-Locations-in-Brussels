@@ -65,7 +65,7 @@ NeyborMap/
 pip install flask
 ```
 
-## Step 2. (Optional) Download Leaflet locally
+### Step 2. (Optional) Download Leaflet locally
 
 If your network blocks CDN links, download:
 
@@ -83,7 +83,8 @@ Then update index.html to use:
 <link rel="stylesheet" href="{{ url_for('static', filename='leaflet/leaflet.css') }}">
 <script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
 ```
-## Step 3. Run the Application
+
+### Step 3. Run the Application
 
 From the project directory:
 ```
@@ -94,6 +95,7 @@ Once the server starts, open:
 ```
 http://127.0.0.1:5000
 ```
+---
 ## 7. Using the Application
 ### 7.1 Viewing the Map
 
@@ -109,7 +111,7 @@ The map automatically zooms to the selected house and opens its popup.
 
 A simple interface lets users select two houses from dropdown lists and calculate the straight-line distance (in kilometers) between them.
 The calculation uses the Haversine formula, which approximates Earth’s curvature.
-
+---
 ## 8. Distance Calculation Formula
 
 The Haversine formula computes the great-circle distance between two points on a sphere using their latitudes and longitudes:
@@ -142,13 +144,14 @@ print("Distance:", round(haversine(*house1, *house2), 2), "km")
 
 
 This provides an accurate “as-the-crow-flies” distance, suitable for geographic visualization.
-
+---
 ## 9. API Endpoints
 Route	Description
 /	Loads the interactive map
 /data.json	Returns house data (name, address, lat, lon) in JSON format
 /ping	Simple health check
 /hello	Test endpoint for debugging
+---
 ## 10. Privacy and Data Protection
 
 Because the data represents residential addresses, special care must be taken before making it public:
@@ -166,11 +169,12 @@ __pycache__/
 *.pyc
 .env
 
-
+---
 
 Privacy Notice:
 The coordinates and addresses in this project are anonymized.
 They represent approximate locations only and do not correspond to actual residences.
+---
 
 11. Troubleshooting
 Issue	Cause	Solution
@@ -178,6 +182,7 @@ Blank map	Leaflet not loading	Use local static/leaflet files
 No markers appear	Error loading /data.json	Check Flask console and JS console
 ngrok error 502	Flask not running or wrong port	Run Flask first on port 5000
 Incorrect distances	Wrong coordinate format	Verify lat/lon values in data.py
+---
 12. Future Enhancements
 
 Integration of route drawing between houses.
@@ -187,12 +192,12 @@ Estimation of travel time using APIs (e.g., Google Maps).
 Addition of house clusters by district or neighborhood.
 
 Exporting distance matrices for operational use.
-
+---
 13. Author
 
 Amel Ghribi (@Neybor)
 Property & Operations Brussels, Belgium
-
+---
 14. License
 
 This project is intended for internal use within Neybor.
