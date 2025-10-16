@@ -9,7 +9,7 @@ It enables users to explore, locate, and analyze Neybor’s housing network geog
 The project uses **Python (Flask)** for the backend and **Leaflet.js** for the frontend map.  
 It also integrates a **distance calculator** that computes straight-line distances between houses using GPS coordinates.
 
-This tool was designed to support **community management, event planning, and logistics optimization** within Neybor’s housing network.
+This tool was designed to support **property management, planning, and logistics optimization** within Neybor’s housing network.
 
 ---
 
