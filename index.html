@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Neybor Houses – Map & Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Leaflet CSS + JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <style>
+    :root{
+      --bg: #fbfbfb;
+      --card: #ffffff;
+      --muted: #6b7280;
+  --accent: #ffb6d5; /* light pink */
+      --airbnb: #b388ff; /* light purple */
+      --neybor: #28a745;
+      --office: #0b4f8c; /* dark blue for office */
+      --control-radius: 10px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#111}
+    header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px;background:var(--card);border-bottom:1px solid #e6e6e6}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    input[type="text"], select{padding:8px 10px;border:1px solid #e0e0e0;border-radius:var(--control-radius);min-width:180px}
+    button{padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+    button.secondary{background:#f3f4f6;color:#111;border:1px solid #e5e7eb}
+    button.ghost{background:transparent;border:1px solid transparent;color:var(--accent)}
+    #map{height:calc(100vh - 116px);margin:12px;border-radius:12px;border:1px solid #e6e6e6}
+    .legend{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--muted)}
+    .legend .item{display:flex;gap:8px;align-items:center}
+    .status{font-size:13px;color:var(--muted);margin-left:8px}
+    @media (max-width:640px){
+      header{padding:10px}
+      input[type="text"], select{min-width:140px}
+      .status{width:100%;margin-top:8px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:10px">
+      <img id="brandLogo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'><rect width='48' height='48' fill='white'/><text x='50%' y='52%' font-family='Segoe UI,Roboto,Arial' font-size='34' text-anchor='middle' dominant-baseline='middle' fill='%23000'>N</text></svg>" alt="Neybor" style="height:40px;width:40px;border-radius:6px;object-fit:contain;display:block" />
+      <h2 style="margin:0;">Neybor Houses – Map of Brussels</h2>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="search" type="text" placeholder="Search a house..." list="houseList">
+      <datalist id="houseList"></datalist>
+      <button id="goBtn">Go</button>
+      <button id="dirBtn" title="Get directions to selected house">Directions</button>
+      <button id="clearRouteBtn" title="Clear route">Clear Route</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-left:12px;font-size:13px;color:#444">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div id="neyborLegend" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <span style="display:inline-block;width:12px;height:12px;border-radius:12px;background:var(--neybor);border:1px solid rgba(0,0,0,0.08)"></span>
+                  <span style="color:#333;font-size:13px">Neybor</span>
+                </div>
+                <div id="officeLegend" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <span style="display:inline-block;width:12px;height:12px;border-radius:12px;background:var(--office);border:1px solid rgba(0,0,0,0.08)"></span>
+                  <span style="color:#333;font-size:13px">Office</span>
+                </div>
+                <div id="airbnbLegend" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <span style="display:inline-block;width:12px;height:12px;border-radius:12px;background:var(--airbnb);border:1px solid rgba(0,0,0,0.08)"></span>
+                  <span style="color:#333;font-size:13px">AirBnB</span>
+                </div>
+              </div>
+        </div>
+      <label style="margin-left:8px;font-size:12px;color:#666">Between:</label>
+      <select id="fromSelect" style="min-width:160px"></select>
+      <select id="toSelect" style="min-width:160px"></select>
+      <button id="routeHousesBtn">Route houses</button>
+      <select id="modeSelect" title="Routing mode" style="margin-left:6px">
+        <option value="driving">Driving</option>
+        <option value="walking">Walking</option>
+      </select>
+    </div>
+    <div id="status">Loading...</div>
+  </header>
+
+  <div id="map"></div>
+
+  <!-- House list panel (hidden by default) -->
+  <aside id="houseListPanel" style="position:fixed;right:12px;top:80px;width:320px;max-height:70vh;overflow:auto;background:rgba(255,255,255,0.98);border:1px solid #e6e6e6;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08);display:none;z-index:9999;padding:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <strong id="houseListTitle">Houses</strong>
+      <button id="closeHouseList" class="secondary" style="padding:6px 8px">Close</button>
+    </div>
+    <div id="houseListRows" style="display:flex;flex-direction:column;gap:6px"></div>
+  </aside>
+
+  <script>
+    const MAP_CENTER = {{ center | tojson }};
+    const DEFAULT_SPEED_KMH = 50; // used to estimate straight-line travel time
+    const statusEl = document.getElementById('status');
+    const searchEl = document.getElementById('search');
+    const goBtn = document.getElementById('goBtn');
+    const houseList = document.getElementById('houseList');
+
+    let map = L.map('map').setView(MAP_CENTER, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let markers = [];
+    
+      // Airbnb list (from attachment) - match by name fragments (case-insensitive)
+      // Only Louise 32 is Airbnb; everything else is a Neybor house (shown in green)
+          // Airbnb are set server-side via is_airbnb; AIRBNB_LIST kept for backward-compat but not authoritative
+          const AIRBNB_LIST = [
+            'Louise 32'
+          ];
+
+      // create a simple pin SVG icon (color as hex) and return an L.icon
+      function makePinIcon(color) {
+        const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C9.4 0 4 5.4 4 12c0 9.9 12 28 12 28s12-18.1 12-28c0-6.6-5.4-12-12-12z" fill="${color}" stroke="#fff" stroke-width="2"/><circle cx="16" cy="12" r="5" fill="#fff"/></svg>`;
+        const url = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        return L.icon({
+          iconUrl: url,
+          iconSize: [32, 44],
+          iconAnchor: [16, 42],
+          popupAnchor: [0, -36]
+        });
+      }
+
+  // read colors from CSS variables (computed value) and create icons with real hex values
+  const _root = getComputedStyle(document.documentElement);
+  const NEYBOR_COLOR = _root.getPropertyValue('--neybor').trim() || '#28a745';
+  const AIRBNB_COLOR = _root.getPropertyValue('--airbnb').trim() || '#b388ff';
+  const DEFAULT_ICON = makePinIcon(NEYBOR_COLOR);
+  const AIRBNB_ICON = makePinIcon(AIRBNB_COLOR);
+  const OFFICE_ICON = makePinIcon(getComputedStyle(document.documentElement).getPropertyValue('--office').trim() || '#0b4f8c');
+
+    let routeLayer = null;
+
+    // haversine distance (km)
+    function haversine(lat1, lon1, lat2, lon2) {
+      function toRad(v){ return v * Math.PI / 180; }
+      const R = 6371; // km
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)*Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    fetch('/data.json')
+      .then(r => r.json())
+      .then(houses => {
+        houses.forEach(h => {
+          // determine if this house is Airbnb: prefer server-provided flag, fall back to list fragments
+          const lname = (h.name || '').toLowerCase();
+          const laddr = (h.address || '').toLowerCase();
+          const hasServerFlag = typeof h.is_airbnb !== 'undefined';
+          const isAirbnb = hasServerFlag ? !!h.is_airbnb : AIRBNB_LIST.some(fragment => {
+            const f = fragment.toLowerCase();
+            return lname.includes(f) || laddr.includes(f);
+          });
+          // choose icon: office (by name) -> OFFICE_ICON, else Airbnb or Neybor
+          const icon = (h.name && h.name.toLowerCase().includes('neybor office')) ? OFFICE_ICON : (isAirbnb ? AIRBNB_ICON : DEFAULT_ICON);
+
+          const m = L.marker([h.lat, h.lon], { icon })
+            .addTo(map)
+            .bindPopup(`<b>${h.name}</b><br>${h.address}`);
+          // clicking marker: normal click -> set destination; shift-click -> set origin
+          m.on('click', (ev) => {
+            try {
+              const fromEl = document.getElementById('fromSelect');
+              const toEl = document.getElementById('toSelect');
+              const isShift = ev && ev.originalEvent && ev.originalEvent.shiftKey;
+
+              if (isShift) {
+                // explicit origin set
+                fromEl.value = h.name;
+                statusEl.textContent = `Set origin: ${h.name}`;
+                return;
+              }
+
+              // If origin is empty, use this click to set origin and prompt user to click destination
+              if (!fromEl.value) {
+                fromEl.value = h.name;
+                searchEl.value = h.name;
+                statusEl.textContent = `Set origin: ${h.name} — now click destination to compute route`;
+                return;
+              }
+
+              // otherwise set destination and compute route if different
+              toEl.value = h.name;
+              searchEl.value = h.name;
+              statusEl.textContent = `Set destination: ${h.name}`;
+              if (fromEl.value && fromEl.value !== toEl.value) {
+                // small timeout to allow UI to update before heavy routing call
+                setTimeout(() => routeBetweenHouses(), 150);
+              }
+            } catch (e) { console.warn('Marker click handler error', e); }
+          });
+          markers.push({ ...h, marker: m, isAirbnb });
+        });
+        // fill datalist for autocomplete
+        houseList.innerHTML = houses.map(h => `<option value="${h.name}">`).join('');
+        // populate from/to selects
+        const fromSel = document.getElementById('fromSelect');
+        const toSel = document.getElementById('toSelect');
+        houses.forEach(h => {
+          const o1 = document.createElement('option'); o1.value = h.name; o1.text = h.name; fromSel.appendChild(o1);
+          const o2 = document.createElement('option'); o2.value = h.name; o2.text = h.name; toSel.appendChild(o2);
+        });
+        statusEl.textContent = `Loaded ${houses.length} houses.`;
+
+        // Legend swatches now open house lists when clicked (markers always visible)
+        const neyborLegend = document.getElementById('neyborLegend');
+        const airbnbLegend = document.getElementById('airbnbLegend');
+  if (neyborLegend) neyborLegend.addEventListener('click', () => showHouseList('neybor'));
+  if (airbnbLegend) airbnbLegend.addEventListener('click', () => showHouseList('airbnb'));
+  const officeLegend = document.getElementById('officeLegend');
+  if (officeLegend) officeLegend.addEventListener('click', () => showHouseList('office'));
+
+        // house list panel helpers
+        function showHouseList(kind) {
+          const rows = document.getElementById('houseListRows');
+          const title = document.getElementById('houseListTitle');
+          rows.innerHTML = '';
+          let filtered;
+          if (kind === 'airbnb') { filtered = markers.filter(m => m.isAirbnb); title.textContent = 'AirBnB houses'; }
+          else if (kind === 'office') { filtered = markers.filter(m => m.name && m.name.toLowerCase().includes('neybor office')); title.textContent = 'Office'; }
+          else { filtered = markers.filter(m => !m.isAirbnb && !(m.name && m.name.toLowerCase().includes('neybor office'))); title.textContent = 'Neybor houses'; }
+          filtered.forEach(m => {
+            const div = document.createElement('div');
+            div.style.padding = '8px';
+            div.style.borderRadius = '8px';
+            div.style.cursor = 'pointer';
+            div.style.background = '#fff';
+            div.style.border = '1px solid #f0f0f0';
+            div.innerHTML = `<strong style="display:block">${m.name}</strong><span style="font-size:13px;color:#666">${m.address}</span>`;
+            div.addEventListener('click', () => {
+              map.setView([m.lat, m.lon], 16);
+              try { m.marker.openPopup(); } catch(e){}
+            });
+            rows.appendChild(div);
+          });
+          document.getElementById('houseListPanel').style.display = 'block';
+        }
+
+        document.getElementById('closeHouseList').addEventListener('click', ()=>{ document.getElementById('houseListPanel').style.display = 'none'; });
+
+        // wire legend clicks (legend elements are created in header; select by content)
+        // Neybor legend: the green square + text; AirBnB legend: checkbox label
+        const legendLabels = document.querySelectorAll('.legend, header');
+        // instead of complex selection, add click handlers to the elements we created earlier
+        const neyborLabel = document.querySelector('header .legend .neybor') || null;
+        const airbnbLabel = document.querySelector('label[for="showAirbnb"]');
+        if (airbnbLabel) airbnbLabel.style.cursor = 'pointer';
+        if (airbnbLabel) airbnbLabel.addEventListener('click', () => showHouseList('airbnb'));
+        // find neybor label by text fallback: add click on the green square wrapper
+        const greenWrapper = document.querySelectorAll('header div')[1];
+        if (greenWrapper) greenWrapper.addEventListener('click', ()=> showHouseList('neybor'));
+      })
+      .catch(err => {
+        console.error(err);
+        statusEl.textContent = 'Error loading data.';
+      });
+
+    async function getRouteTo(found) {
+      if (!found) {
+        statusEl.textContent = 'Select a house first';
+        return;
+      }
+
+      statusEl.textContent = 'Getting your location...';
+
+      function getPos() {
+        return new Promise((resolve) => {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => resolve([p.coords.latitude, p.coords.longitude]),
+              () => resolve(MAP_CENTER), { timeout: 5000 });
+          } else {
+            resolve(MAP_CENTER);
+          }
+        });
+      }
+
+      const from = await getPos();
+      const to = [found.lat, found.lon];
+
+      const mode = document.getElementById('modeSelect')?.value || 'driving';
+      const profile = mode === 'walking' ? 'foot' : 'driving';
+      const coords = `${from[1]},${from[0]};${to[1]},${to[0]}`;
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${coords}?overview=full&geometries=geojson`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Routing error');
+        const j = await res.json();
+        if (!j.routes || !j.routes.length) throw new Error('No route');
+        const r = j.routes[0];
+
+        if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+        routeLayer = L.geoJSON(r.geometry, { style: { color: '#0078ff', weight: 5, opacity: 0.8 } }).addTo(map);
+        map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+
+        const km = (r.distance / 1000).toFixed(2);
+        const mins = Math.round(r.duration / 60);
+        const straightKm = haversine(from[0], from[1], to[0], to[1]).toFixed(2);
+        const speed = mode === 'walking' ? 5 : DEFAULT_SPEED_KMH;
+        const estMinutesStraight = Math.round((straightKm / speed) * 60);
+        statusEl.textContent = `Route: ${km} km, ~${mins} min · Straight-line: ${straightKm} km (~${estMinutesStraight} min at ${speed} km/h)`;
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Could not get directions';
+      }
+    }
+
+    function clearRoute() {
+      if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; statusEl.textContent = 'Route cleared'; }
+    }
+
+
+    async function routeBetweenHouses() {
+      const fromName = document.getElementById('fromSelect').value;
+      const toName = document.getElementById('toSelect').value;
+      if (!fromName || !toName) { statusEl.textContent = 'Choose both origin and destination'; return; }
+      if (fromName === toName) { statusEl.textContent = 'Origin and destination must be different'; return; }
+      const from = markers.find(m => m.name === fromName);
+      const to = markers.find(m => m.name === toName);
+      if (!from || !to) { statusEl.textContent = 'Could not find selected houses'; return; }
+
+      const coords = `${from.lon},${from.lat};${to.lon},${to.lat}`;
+      const mode = document.getElementById('modeSelect')?.value || 'driving';
+      const profile = mode === 'walking' ? 'foot' : 'driving';
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${coords}?overview=full&geometries=geojson`;
+      try {
+        statusEl.textContent = 'Computing route between houses...';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Routing error');
+        const j = await res.json();
+        if (!j.routes || !j.routes.length) throw new Error('No route');
+        const r = j.routes[0];
+
+  if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+  routeLayer = L.geoJSON(r.geometry, { style: { color: getComputedStyle(document.documentElement).getPropertyValue('--airbnb').trim() || '#b388ff', weight: 5, opacity: 0.9 } }).addTo(map);
+        map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+        const km = (r.distance / 1000).toFixed(2);
+        const mins = Math.round(r.duration / 60);
+        const straightKm = haversine(from.lat, from.lon, to.lat, to.lon).toFixed(2);
+        const speed = mode === 'walking' ? 5 : DEFAULT_SPEED_KMH;
+        const estMinutesStraight = Math.round((straightKm / speed) * 60);
+        statusEl.textContent = `Route: ${km} km, ~${mins} min · Straight-line: ${straightKm} km (~${estMinutesStraight} min at ${speed} km/h)`;
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Failed to compute route between houses';
+      }
+    }
+
+    function jumpTo(query) {
+      if (!query) return;
+      const found = markers.find(h =>
+        h.name.toLowerCase().includes(query.toLowerCase()) ||
+        h.address.toLowerCase().includes(query.toLowerCase())
+      );
+      if (found) {
+        map.setView([found.lat, found.lon], 16);
+        try {
+          if (found.marker && found.marker.openPopup) found.marker.openPopup();
+        } catch (e) { console.warn('Marker popup failed', e); }
+        statusEl.textContent = `Found: ${found.name}`;
+        return;
+      }
+      statusEl.textContent = 'No match found';
+    }
+
+      // hook up UI
+      goBtn.addEventListener('click', () => jumpTo(searchEl.value));
+      searchEl.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          jumpTo(searchEl.value);
+        }
+      });
+      dirBtn.addEventListener('click', () => {
+        const q = searchEl.value;
+        const found = markers.find(h => h.name.toLowerCase().includes(q.toLowerCase()));
+        getRouteTo(found);
+      });
+      clearRouteBtn.addEventListener('click', () => {
+        clearRoute();
+        try { document.getElementById('fromSelect').value = ''; document.getElementById('toSelect').value = ''; } catch(e){}
+      });
+      document.getElementById('routeHousesBtn').addEventListener('click', routeBetweenHouses);
+
+      // finished script
+  </script>
+</body>
+</html>
