@@ -42,9 +42,6 @@ The project aims to:
 
 ## 5. Project Structure
 
----
-
-## Project Structure
 ```
 NeyborMap/
 │
