@@ -1,0 +1,2 @@
+# Neybor-Map-App-Interactive-Visualization-of-Housing-Locations-in-Brussels
+The Neybor Houses Map Visualization is an interactive web app built with Flask and Leaflet.js that displays the geographic locations of all Neybor houses across Brussels. The app uses the GPS coordinates of each house (from data.py) to generate a real-time map where users can view, search, and explore all properties managed by Neybor.
