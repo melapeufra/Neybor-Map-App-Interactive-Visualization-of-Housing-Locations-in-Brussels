@@ -172,11 +172,13 @@ __pycache__/
 ---
 
 ## Privacy Notice:
+
 The coordinates and addresses in this project are anonymized.
 They represent approximate locations only and do not correspond to actual residences.
 ---
 
 ## 11. Troubleshooting
+
 Issue	Cause	Solution
 Blank map	Leaflet not loading	Use local static/leaflet files
 No markers appear	Error loading /data.json	Check Flask console and JS console
