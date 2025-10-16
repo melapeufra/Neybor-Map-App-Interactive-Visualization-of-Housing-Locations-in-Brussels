@@ -82,21 +82,21 @@ static/leaflet/
 
 
 Then update index.html to use:
-
+```
 <link rel="stylesheet" href="{{ url_for('static', filename='leaflet/leaflet.css') }}">
 <script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
-
+```
 ## Step 3. Run the Application
 
 From the project directory:
-
+```
 python app.py
-
+```
 
 Once the server starts, open:
-
+```
 http://127.0.0.1:5000
-
+```
 ## 7. Using the Application
 ### 7.1 Viewing the Map
 
@@ -170,7 +170,6 @@ __pycache__/
 .env
 
 
-Add a privacy statement to public versions:
 
 Privacy Notice:
 The coordinates and addresses in this project are anonymized.
