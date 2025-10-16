@@ -173,8 +173,8 @@ __pycache__/
 
 ## Privacy Notice:
 
-The coordinates and addresses in this project are anonymized.
-They represent approximate locations only and do not correspond to actual residences.
+####The coordinates and addresses in this project are anonymized.
+####They represent approximate locations only and do not correspond to actual residences.
 ---
 
 ## 11. Troubleshooting
