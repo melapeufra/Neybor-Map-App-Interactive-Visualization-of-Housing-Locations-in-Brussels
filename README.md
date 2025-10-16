@@ -171,19 +171,19 @@ __pycache__/
 
 ---
 
-Privacy Notice:
+## Privacy Notice:
 The coordinates and addresses in this project are anonymized.
 They represent approximate locations only and do not correspond to actual residences.
 ---
 
-11. Troubleshooting
+## 11. Troubleshooting
 Issue	Cause	Solution
 Blank map	Leaflet not loading	Use local static/leaflet files
 No markers appear	Error loading /data.json	Check Flask console and JS console
 ngrok error 502	Flask not running or wrong port	Run Flask first on port 5000
 Incorrect distances	Wrong coordinate format	Verify lat/lon values in data.py
 ---
-12. Future Enhancements
+## 12. Future Enhancements
 
 Integration of route drawing between houses.
 
@@ -193,12 +193,12 @@ Addition of house clusters by district or neighborhood.
 
 Exporting distance matrices for operational use.
 ---
-13. Author
+## 13. Author
 
 Amel Ghribi (@Neybor)
 Property & Operations Brussels, Belgium
 ---
-14. License
+## 14. License
 
 This project is intended for internal use within Neybor.
 If shared publicly, it may be released under an open-source license (such as MIT) provided that addresses and GPS coordinates are anonymized.
